@@ -6,3 +6,4 @@ pydantic
 jinja2
 beautifulsoup4
 playwright
+sentence-transformers
