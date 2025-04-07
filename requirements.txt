@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+streamlit
+requests
+pydantic
+jinja2
+beautifulsoup4
+playwright
