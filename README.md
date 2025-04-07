@@ -99,6 +99,8 @@ This opens a browser interface to interact with the SHL recommender.
 <img src="../data/evaluation/benchmark_results.png" alt="Benchmark Results" width="500"/>
 
 ---
+## Demo Video
+[🎥 Watch Demo](demovideo/19-28-44.mp4)
 
 ## 🤝 Author
 
