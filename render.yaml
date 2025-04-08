@@ -7,7 +7,7 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.11
-        
+
  - type: web
     name: shl-recommender-frontend
     env: python
@@ -17,4 +17,4 @@ services:
       - key: PYTHON_VERSION
         value: 3.10.11
       - key: API_URL
-        value: "https://shl-recommender-api-backend.onrender.com" 
+        value: "https://shl-recommender-1-9bpx.onrender.com/" 
