@@ -18,3 +18,5 @@ services:
         value: 3.10.11
       - key: API_URL
         value: "https://shl-recommender-1-9bpx.onrender.com/" 
+       - key: CURRENT_USER
+        value: saurabhbisht076
