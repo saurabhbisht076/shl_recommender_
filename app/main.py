@@ -9,7 +9,7 @@ from app.models import RecommendationRequest, CleanRecommendationResponse
 from app.recommender import SHLRecommender
 
 # Constants
-CURRENT_TIME = "2025-04-08 20:51:39"
+CURRENT_TIME = "2025-04-08 21:01:37"
 CURRENT_USER = "saurabhbisht076"
 
 app = FastAPI(
@@ -34,7 +34,7 @@ CATALOG_PATH = os.path.join("data", "processed", "shl_assessments_detailed.json"
 recommender = SHLRecommender()
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {
         "message": "Welcome to SHL Assessment Recommender API",
         "timestamp": CURRENT_TIME,
@@ -43,7 +43,7 @@ def read_root():
     }
 
 @app.get("/health")
-def health_check():
+async def health_check():
     return {
         "status": "healthy",
         "timestamp": CURRENT_TIME,
@@ -51,7 +51,7 @@ def health_check():
     }
 
 @app.get("/assessments", response_model=Dict[str, Any])
-def get_all_assessments():
+async def get_all_assessments():
     try:
         with open(CATALOG_PATH, 'r') as f:
             data = json.load(f)
@@ -60,7 +60,7 @@ def get_all_assessments():
         raise HTTPException(status_code=500, detail=f"Error loading assessments: {str(e)}")
 
 @app.post("/recommend", response_model=CleanRecommendationResponse)
-def get_recommendations(request: RecommendationRequest):
+async def get_recommendations(request: RecommendationRequest):
     try:
         recommendations = recommender.get_recommendations(
             query=request.query,
@@ -81,7 +81,7 @@ def get_recommendations(request: RecommendationRequest):
         raise HTTPException(status_code=500, detail=f"Recommendation error: {str(e)}")
 
 @app.get("/job-levels")
-def get_job_levels():
+async def get_job_levels():
     try:
         with open(CATALOG_PATH, 'r') as f:
             data = json.load(f)
@@ -93,7 +93,7 @@ def get_job_levels():
         raise HTTPException(status_code=500, detail=f"Error loading job levels: {str(e)}")
 
 @app.get("/test-types")
-def get_test_types():
+async def get_test_types():
     try:
         with open(CATALOG_PATH, 'r') as f:
             data = json.load(f)
@@ -106,4 +106,5 @@ def get_test_types():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
