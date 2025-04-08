@@ -3,7 +3,7 @@ import requests
 
 # Config
 st.set_page_config(page_title="SHL Assessment Recommender", page_icon="📊", layout="wide")
-API_URL = "http://localhost:8000"
+API_URL = "https://shl-recommender-1-9bpx.onrender.com"
 
 # Helper Functions
 def fetch_metadata(endpoint, label):
