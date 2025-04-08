@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from app.utils import clean_recommendations, get_current_timestamp
+from typing import List, Dict, Any
 import json
 import os
 
-from app.models import RecommendationRequest, RecommendationResponse
+from app.models import RecommendationRequest, CleanRecommendationResponse
 from app.recommender import SHLRecommender
 
 app = FastAPI(
@@ -30,9 +31,21 @@ recommender = SHLRecommender()
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to SHL Assessment Recommender API"}
+    return {
+        "message": "Welcome to SHL Assessment Recommender API",
+        "timestamp": get_current_timestamp(),
+        "user": "saurabhbisht076"
+    }
 
-@app.get("/assessments", response_model=dict)
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": get_current_timestamp(),
+        "user": "saurabhbisht076"
+    }
+
+@app.get("/assessments", response_model=Dict[str, Any])
 def get_all_assessments():
     try:
         with open(CATALOG_PATH, 'r') as f:
@@ -41,7 +54,7 @@ def get_all_assessments():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading assessments: {str(e)}")
 
-@app.post("/recommend", response_model=RecommendationResponse)
+@app.post("/recommend", response_model=CleanRecommendationResponse)
 def get_recommendations(request: RecommendationRequest):
     try:
         recommendations = recommender.get_recommendations(
@@ -52,16 +65,12 @@ def get_recommendations(request: RecommendationRequest):
             test_type=request.test_type,
             top_n=request.top_n
         )
-        return RecommendationResponse(
-            recommendations=recommendations,
-            query=request.query,
-            filters_applied={
-                "job_level": request.job_level,
-                "max_duration": request.max_duration,
-                "languages": request.languages,
-                "test_type": request.test_type,
-                "top_n": request.top_n
-            }
+        
+        # Transform to clean format
+        cleaned_recommendations = clean_recommendations(recommendations)
+        
+        return CleanRecommendationResponse(
+            recommended_assessments=cleaned_recommendations
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Recommendation error: {str(e)}")

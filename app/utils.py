@@ -1,29 +1,41 @@
-import re
 from datetime import datetime
 import os
 import json
+from typing import List, Dict, Any, Optional
 
-def parse_duration(duration_str):
+def get_current_timestamp() -> str:
+    """Get current timestamp in UTC"""
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+def parse_duration(duration_str) -> Optional[int]:
     """Parse duration string to minutes"""
     if not duration_str:
         return None
         
     try:
-        minutes = int(''.join(filter(str.isdigit, duration_str)))
+        minutes = int(''.join(filter(str.isdigit, str(duration_str))))
         return minutes
     except ValueError:
         return None
 
-def save_debug_html(html_content, filename):
-    """Save HTML content for debugging"""
-    debug_dir = 'data/debug'
-    if not os.path.exists(debug_dir):
-        os.makedirs(debug_dir)
-    
-    with open(os.path.join(debug_dir, filename), 'w', encoding='utf-8') as f:
-        f.write(html_content)
+def clean_recommendations(recommendations: list) -> List[Dict[str, Any]]:
+    """Clean and transform recommendations to match API spec"""
+    cleaned = []
+    for rec in recommendations[:10]:  # Limit to 10 recommendations
+        if "assessment" in rec:
+            assessment = rec["assessment"]
+            cleaned_assessment = {
+                "url": assessment.get("url", ""),
+                "adaptive_support": "Yes" if assessment.get("adaptive_irt_support") else "No",
+                "description": assessment.get("description", ""),
+                "duration": parse_duration(assessment.get("duration", "0")) or 0,
+                "remote_support": "Yes" if assessment.get("remote_testing_support") else "No",
+                "test_type": [assessment.get("test_type")] if isinstance(assessment.get("test_type"), str) else assessment.get("test_type", [])
+            }
+            cleaned.append(cleaned_assessment)
+    return cleaned
 
-def load_catalog():
+def load_catalog() -> Dict:
     """Load the catalog data"""
     try:
         with open('data/processed/shl_catalog.json', 'r') as f:
@@ -35,17 +47,14 @@ def load_catalog():
         except FileNotFoundError:
             return {"metadata": {}, "assessments": []}
 
-def save_catalog(catalog_data, processed=True):
+def save_catalog(catalog_data: Dict, processed: bool = True) -> None:
     """Save catalog data to appropriate location"""
     path = 'data/processed/shl_catalog.json' if processed else 'data/raw/shl_catalog.json'
-    
-    # Ensure directory exists
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    
     with open(path, 'w') as f:
         json.dump(catalog_data, f, indent=2)
 
-def get_unique_values(catalog_data, field):
+def get_unique_values(catalog_data: Dict, field: str) -> List[str]:
     """Extract unique values for a given field across all assessments"""
     values = set()
     for assessment in catalog_data.get('assessments', []):
