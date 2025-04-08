@@ -7,3 +7,14 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.11
+        
+ - type: web
+    name: shl-recommender-frontend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.11
+      - key: API_URL
+        value: "https://shl-recommender-api-backend.onrender.com" 
