@@ -1,12 +1,16 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.utils import clean_recommendations, get_current_timestamp
+from app.utils import clean_recommendations
 from typing import List, Dict, Any
 import json
 import os
 
 from app.models import RecommendationRequest, CleanRecommendationResponse
 from app.recommender import SHLRecommender
+
+# Constants
+CURRENT_TIME = "2025-04-08 20:51:39"
+CURRENT_USER = "saurabhbisht076"
 
 app = FastAPI(
     title="SHL Assessment Recommender API",
@@ -17,13 +21,13 @@ app = FastAPI(
 # CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ✅ Adjust this in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Correct path to the file that has your data
+# Data path
 CATALOG_PATH = os.path.join("data", "processed", "shl_assessments_detailed.json")
 
 # Initialize recommender
@@ -33,16 +37,17 @@ recommender = SHLRecommender()
 def read_root():
     return {
         "message": "Welcome to SHL Assessment Recommender API",
-        "timestamp": get_current_timestamp(),
-        "user": "saurabhbisht076"
+        "timestamp": CURRENT_TIME,
+        "user": CURRENT_USER,
+        "status": "running"
     }
 
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
-        "timestamp": get_current_timestamp(),
-        "user": "saurabhbisht076"
+        "timestamp": CURRENT_TIME,
+        "user": CURRENT_USER
     }
 
 @app.get("/assessments", response_model=Dict[str, Any])
@@ -99,6 +104,6 @@ def get_test_types():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading test types: {str(e)}")
 
-if __name__ == "__main__" and os.getenv("ENV") != "prod":
+if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)
