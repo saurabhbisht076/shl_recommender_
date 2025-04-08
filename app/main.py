@@ -4,12 +4,16 @@ from app.utils import clean_recommendations
 from typing import List, Dict, Any
 import json
 import os
+from datetime import datetime
 
 from app.models import RecommendationRequest, CleanRecommendationResponse
 from app.recommender import SHLRecommender
 
+def get_current_time():
+    """Get current UTC time in YYYY-MM-DD HH:MM:SS format"""
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
 # Constants
-CURRENT_TIME = "2025-04-08 21:12:32"
 CURRENT_USER = "saurabhbisht076"
 
 app = FastAPI(
@@ -37,7 +41,7 @@ recommender = SHLRecommender()
 async def read_root():
     return {
         "message": "Welcome to SHL Assessment Recommender API",
-        "timestamp": CURRENT_TIME,
+        "timestamp": get_current_time(),
         "user": CURRENT_USER,
         "status": "running"
     }
@@ -46,7 +50,7 @@ async def read_root():
 async def health_check():
     return {
         "status": "healthy",
-        "timestamp": CURRENT_TIME,
+        "timestamp": get_current_time(),
         "user": CURRENT_USER
     }
 
@@ -107,4 +111,4 @@ async def get_test_types():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
